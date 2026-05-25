@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#0A1628">
+  <title>YWY — ระบบปฏิบัติงาน</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    /* ===== TOKENS ===== */
+    :root {
+      --bg:        #0A1628;
+      --bg2:       #111D35;
+      --surface:   #162040;
+      --surface2:  #1C2A50;
+      --border:    rgba(255,255,255,0.08);
+      --green:     #00C471;
+      --green-dim: #009956;
+      --yellow:    #FFCD00;
+      --red:       #FF4455;
+      --blue:      #3B82F6;
+      --orange:    #FF8C42;
+      --purple:    #9B5DE5;
+      --text:      #F0F4FF;
+      --text2:     #8899BB;
+      --text3:     #4A5880;
+      --radius:    16px;
+      --radius-sm: 10px;
+      --shadow:    0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 90px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .header-logo {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: var(--surface2);
+      padding: 2px;
+    }
+    .header-text { flex: 1; }
+    .header-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .header-sub { font-size: 12px; color: var(--text2); }
+    .dept-badge {
+      background: var(--green);
+      color: #000;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: none;
+    }
+
+    /* ===== TICKER ===== */
+    .ticker {
+      background: linear-gradient(90deg, var(--yellow) 0%, #FFB800 100%);
+      color: #000;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .ticker-inner {
+      display: inline-block;
+      animation: ticker 28s linear infinite;
+      padding-left: 100%;
+    }
+    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-100%)} }
+
+    /* ===== CONTAINER ===== */
+    .container { padding: 20px 16px; max-width: 520px; margin: auto; }
+
+    /* ===== PAGE TRANSITIONS ===== */
+    .page { animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ===== DEPT SELECTION PAGE ===== */
+    .welcome-msg {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-top: 8px;
+    }
+    .welcome-msg h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .welcome-msg p { color: var(--text2); font-size: 14px; }
+
+    .dept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .dept-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .dept-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .dept-card:active { transform: scale(0.96); }
+    .dept-card.guard::before { background: radial-gradient(circle at top, rgba(59,130,246,0.15), transparent 70%); }
+    .dept-card.maid::before  { background: radial-gradient(circle at top, rgba(255,77,141,0.15), transparent 70%); }
+    .dept-card:active::before { opacity: 1; }
+    .dept-icon {
+      font-size: 42px;
+      margin-bottom: 12px;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+    .dept-card.guard .dept-icon { color: var(--blue); }
+    .dept-card.maid  .dept-icon { color: #FF4D8D; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+    .dept-label { font-size: 15px; font-weight: 700; }
+    .dept-card.guard .dept-label { color: var(--blue); }
+    .dept-card.maid  .dept-label { color: #FF4D8D; }
+    .dept-sub { font-size: 12px; color: var(--text3); margin-top: 3px; }
+
+    /* ===== MAIN MENU ===== */
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .menu-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .menu-card:active { transform: scale(0.95); }
+    .menu-card .mc-icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .menu-card .mc-label { font-size: 14px; font-weight: 600; color: var(--text); }
+    .menu-card .mc-sub   { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+    .mc-blue   .mc-icon { color: var(--blue); }
+    .mc-red    .mc-icon { color: var(--red); }
+    .mc-green  .mc-icon { color: var(--green); }
+    .mc-orange .mc-icon { color: var(--orange); }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title i { font-size: 18px; }
+
+    /* ===== FORM ELEMENTS ===== */
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 7px;
+      display: block;
+    }
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'Sarabun', sans-serif;
+      font-size: 15px;
+      padding: 13px 15px;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--blue);
+    }
+    select { cursor: pointer; }
+    select option { background: var(--bg2); }
+    textarea { resize: none; }
+
+    /* ===== GPS STATUS ===== */
+    .gps-box {
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      text-align: center;
+      margin-bottom: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .gps-loading { background: rgba(255,205,0,0.1); color: var(--yellow); border: 1px solid rgba(255,205,0,0.2); }
+    .gps-ok  { background: rgba(0,196,113,0.1); color: var(--green); border: 1px solid rgba(0,196,113,0.2); }
+    .gps-err { background: rgba(255,68,85,0.1); color: var(--red);   border: 1px solid rgba(255,68,85,0.2); animation: pulseRed 2s infinite; }
+    @keyframes pulseRed { 0%,100%{box-shadow:0 0 0 0 rgba(255,68,85,0.3)} 50%{box-shadow:0 0 0 8px rgba(255,68,85,0)} }
+
+    /* ===== CAMERA AREA ===== */
+    .cam-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 22px 16px;
+      text-align: center;
+      position: relative;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      margin-bottom: 14px;
+    }
+    .cam-zone:hover, .cam-zone:active { border-color: var(--blue); background: rgba(59,130,246,0.05); }
+    .cam-zone i { font-size: 28px; color: var(--text3); margin-bottom: 8px; display: block; }
+    .cam-zone span { font-size: 13px; color: var(--text2); font-weight: 500; }
+    .cam-zone input[type="file"] {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      opacity: 0; cursor: pointer;
+      border: none; background: none; padding: 0;
+    }
+
+    /* ===== PHOTO PREVIEW ===== */
+    .preview-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .preview-strip::-webkit-scrollbar { display: none; }
+    .preview-strip img {
+      height: 72px; width: 72px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ===== SAVE BUTTON ===== */
+    .btn-save {
+      width: 100%;
+      padding: 17px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Sarabun', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.3px;
+    }
+    .btn-save:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-blue   { background: var(--blue);   color: #fff; }
+    .btn-red    { background: var(--red);    color: #fff; }
+    .btn-green  { background: var(--green);  color: #000; }
+    .btn-orange { background: var(--orange); color: #fff; }
+    .btn-purple { background: var(--purple); color: #fff; }
+
+    /* ===== SECONDARY BUTTON ===== */
+    .btn-outline {
+      flex: 1;
+      padding: 13px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-outline:hover { background: var(--surface2); }
+    .btn-row { display: flex; gap: 10px; }
+
+    /* ===== BOTTOM NAV ===== */
+    .nav-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: none;
+      height: 76px;
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-inner { display: flex; height: 76px; }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--text3);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s;
+      position: relative;
+    }
+    .nav-item i { font-size: 20px; }
+    .nav-item.active { color: var(--green); }
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 32px; height: 3px;
+      background: var(--green);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* ===== NOTE LOG ===== */
+    .search-bar {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'Sarabun', sans-serif;
+      font-size: 15px;
+      padding: 12px 16px;
+      width: 100%;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .search-bar:focus { border-color: var(--blue); }
+
+    .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .chip.active { background: var(--green); color: #000; border-color: var(--green); }
+
+    .log-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .log-time {
+      background: var(--surface2);
+      padding: 10px 16px;
+      font-size: 12px;
+      color: var(--text2);
+      display: flex; align-items: center; gap: 7px;
+      border-bottom: 1px solid var(--border);
+    }
+    .log-photos {
+      display: flex;
+      gap: 6px;
+      padding: 10px 12px;
+      overflow-x: auto;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+    }
+    .log-photos::-webkit-scrollbar { display: none; }
+    .log-photos img {
+      height: 100px; width: auto; max-width: 80vw;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .log-body { padding: 14px 16px; }
+    .log-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .log-desc  { font-size: 13px; color: var(--text2); }
+
+    .empty-state { text-align: center; padding: 48px 16px; color: var(--text3); }
+    .empty-state i { font-size: 40px; margin-bottom: 14px; display: block; }
+    .empty-state p { font-size: 14px; }
+
+    /* ===== REPORT PAGE ===== */
+    .report-header { margin-bottom: 20px; }
+    .report-header h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .report-header p  { font-size: 13px; color: var(--text2); }
+
+    .report-selects { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .report-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+    .report-btn {
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .report-btn.purple { background: var(--purple); color: #fff; }
+    .report-btn.excel  { background: #1a7f4e; color: #fff; }
+
+    .report-section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .report-file-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+    .report-file-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+    .report-file-date  { font-size: 12px; color: var(--text2); margin-bottom: 14px; }
+    .report-file-btns  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .report-file-btn {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .report-file-btn.pdf   { background: var(--red);   color: #fff; }
+    .report-file-btn.excel { background: #1a7f4e; color: #fff; }
+
+    /* ===== SWEETALERT2 DARK OVERRIDES ===== */
+    .swal2-popup {
+      background: var(--surface) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--radius) !important;
+      font-family: 'Sarabun', sans-serif !important;
+    }
+    .swal2-title { color: var(--text) !important; }
+    .swal2-content { color: var(--text2) !important; }
+    .swal2-input, .swal2-textarea {
+      background: var(--bg2) !important;
+      border-color: var(--border) !important;
+      color: var(--text) !important;
+    }
+
+    /* ===== LOADING SPINNER ===== */
+    .loader { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-center { text-align: center; padding: 40px; color: var(--text2); }
+    .loading-center .loader { width: 32px; height: 32px; margin-bottom: 12px; }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <img src="https://img2.pic.in.th/1000039113.png" class="header-logo" alt="YWY">
+  <div class="header-text">
+    <div class="header-title">YWY ระบบปฏิบัติงาน</div>
+    <div class="header-sub" id="header-sub">เด็กสมบูรณ์ Security</div>
+  </div>
+  <div class="dept-badge" id="dept-badge">—</div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <span class="ticker-inner">📢 ระบบปฏิบัติงาน เด็กสมบูรณ์ &nbsp;|&nbsp; โปรดเลือกแผนกเพื่อเข้าใช้งาน &nbsp;|&nbsp; ขอบคุณที่ปฏิบัติหน้าที่อย่างเต็มที่ 💪 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+
+  <!-- PAGE: DEPT SELECT -->
+  <div id="page-dept" class="page">
+    <div class="welcome-msg">
+      <h2>สวัสดีครับ/ค่ะ 👋</h2>
+      <p>กรุณาเลือกแผนกของคุณเพื่อเริ่มปฏิบัติงาน</p>
+    </div>
+    <div class="dept-grid">
+      <div class="dept-card guard" onclick="setDept('รปภ.')">
+        <i class="fas fa-shield-alt dept-icon"></i>
+        <div class="dept-label">เจ้าหน้าที่ รปภ.</div>
+        <div class="dept-sub">Security Guard</div>
+      </div>
+      <div class="dept-card maid" onclick="setDept('แม่บ้าน')">
+        <i class="fas fa-broom dept-icon"></i>
+        <div class="dept-label">พนักงานแม่บ้าน</div>
+        <div class="dept-sub">Housekeeping</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: MAIN MENU -->
+  <div id="page-main-menu" class="page" style="display:none;">
+    <div class="section-title">เมนูปฏิบัติงาน</div>
+    <div class="menu-grid">
+      <div class="menu-card mc-blue" onclick="showP('s-form')">
+        <i class="fas fa-user-check mc-icon"></i>
+        <div class="mc-label">เข้า/ออกงาน</div>
+        <div class="mc-sub">Check In / Out</div>
+      </div>
+      <div class="menu-card mc-red" id="btn-point" onclick="showP('p-form')">
+        <i class="fas fa-map-marker-alt mc-icon"></i>
+        <div class="mc-label">ตรวจจุด</div>
+        <div class="mc-sub">Patrol Point</div>
+      </div>
+      <div class="menu-card mc-green" id="btn-vehicle" onclick="showP('v-form')">
+        <i class="fas fa-truck-moving mc-icon"></i>
+        <div class="mc-label">ตรวจรถ</div>
+        <div class="mc-sub">Vehicle Log</div>
+      </div>
+      <div class="menu-card mc-orange" id="btn-person" onclick="showP('c-form')">
+        <i class="fas fa-id-badge mc-icon"></i>
+        <div class="mc-label">ตรวจบุคคล</div>
+        <div class="mc-sub">Visitor Log</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: ATTENDANCE FORM -->
+  <div id="page-s-form" class="page" style="display:none;">
+    <div class="card">
+      <div class="card-title" style="color:var(--blue);">
+        <i class="fas fa-user-check"></i> บันทึกเวลาทำงาน
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">สถานะ</label>
+        <select id="s-type">
+          <option value="เข้างาน">🟢 เข้างาน (Check-In)</option>
+          <option value="ออกงาน">🔴 เลิกงาน (Check-Out)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="name-input-guard">
+        <label class="form-label">ชื่อ-นามสกุล</label>
+        <input type="text" id="s-name-guard" placeholder="พิมพ์ชื่อของคุณ">
+      </div>
+
+      <div class="form-group" id="name-input-maid" style="display:none;">
+        <label class="form-label">เลือกชื่อของคุณ</label>
+        <select id="s-name-maid">
+          <option value="" disabled selected>— แตะเพื่อเลือก —</option>
+          <option value="ใย ชะนะฤทธิ์">ใย ชะนะฤทธิ์</option>
+          <option value="สมทรง คุ้มครองทรัพย์">สมทรง คุ้มครองทรัพย์</option>
+        </select>
+      </div>
+
+      <div id="gps-status"></div>
+
+      <div class="form-group">
+        <label class="form-label">📸 ถ่ายเซลฟี่ยืนยันตัวตน</label>
+        <div id="prev-s-staff" class="preview-strip"></div>
+        <div class="cam-zone" style="border-color:var(--blue);">
+          <i class="fas fa-camera-retro" style="color:var(--blue)"></i>
+          <span>แตะเพื่อถ่ายรูป</span>
+          <input type="file" accept="image/*" capture="environment" multiple onchange="preview(this,'sStaff')">
+        </div>
+      </div>
+
+      <button class="btn-save btn-blue" onclick="saveS()">
+        <i class="fas fa-check-circle"></i> บันทึกเวลา
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGE: PATROL POINT FORM -->
+  <div id="page-p-form" class="page" style="display:none;">
+    <div class="card">
+      <div class="card-title" style="color:var(--red);">
+        <i class="fas fa-map-marker-alt"></i> บันทึกตรวจจุด
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">เลือกจุดตรวจ</label>
+        <select id="p-name">
+          <option value="" disabled selected>— แตะเพื่อเลือกจุด —</option>
+          <option value="ป้อมรปภ">📍 ป้อมรปภ</option>
+          <option value="บริเวณเสาธง">📍 บริเวณเสาธง</option>
+          <option value="ต้นมะดัน">📍 ต้นมะดัน</option>
+          <option value="บริเวณห้องบอยเลอร์">📍 บริเวณห้องบอยเลอร์</option>
+          <option value="บริเวณสนามเบตอง">📍 บริเวณสนามเบตอง</option>
+          <option value="จุดตรวจโรงอาหาร">📍 จุดตรวจโรงอาหาร</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">สถานการณ์</label>
+        <select id="p-status">
+          <option value="ปกติ">✅ ปกติเรียบร้อย</option>
+          <option value="มีปัญหา">⚠️ พบปัญหา (ระบุด้านล่าง)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">รายละเอียด (ถ้ามีปัญหา)</label>
+        <textarea id="p-note" rows="2" placeholder="อธิบายปัญหาที่พบ..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ชื่อผู้ตรวจ</label>
+        <input type="text" id="p-inspector-guard" placeholder="พิมพ์ชื่อผู้ตรวจ">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📸 ถ่ายรูปจุดตรวจ</label>
+        <div id="prev-p-img" class="preview-strip"></div>
+        <div class="cam-zone" style="border-color:var(--red);">
+          <i class="fas fa-camera" style="color:var(--red)"></i>
+          <span>แตะเพื่อถ่ายรูป</span>
+          <input type="file" accept="image/*" capture="environment" multiple onchange="preview(this,'pImg')">
+        </div>
+      </div>
+
+      <button class="btn-save btn-red" onclick="saveP()">
+        <i class="fas fa-paper-plane"></i> ส่งรายงานตรวจจุด
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGE: VEHICLE FORM -->
+  <div id="page-v-form" class="page" style="display:none;">
+    <div class="card">
+      <div class="card-title" style="color:var(--green);">
+        <i class="fas fa-truck-moving"></i> บันทึกตรวจรถ
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ประเภทรถ</label>
+        <select id="v-type">
+          <option value="รถเข้า">🟢 รถเข้า (IN)</option>
+          <option value="รถออก">🔴 รถออก (OUT)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ทะเบียนรถ</label>
+        <input type="text" id="v-plate" placeholder="กข 1234 / ABC-1234">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ชื่อคนขับ</label>
+        <input type="text" id="v-driver" placeholder="ชื่อ-นามสกุล">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">หมายเหตุ</label>
+        <textarea id="v-note" rows="2" placeholder="วัตถุประสงค์การเข้า-ออก"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📸 ถ่ายรูปรถ</label>
+        <div id="prev-v-car" class="preview-strip"></div>
+        <div class="cam-zone" style="border-color:var(--green);">
+          <i class="fas fa-truck" style="color:var(--green)"></i>
+          <span>แตะเพื่อถ่ายภาพ</span>
+          <input type="file" accept="image/*" capture="environment" multiple onchange="preview(this,'vCar')">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">🪪 รูปใบขับขี่</label>
+        <div id="prev-v-lic" class="preview-strip"></div>
+        <div class="cam-zone" style="border-color:var(--text3);">
+          <i class="fas fa-id-card" style="color:var(--text3)"></i>
+          <span>ถ่ายใบขับขี่ (ถ้ามี)</span>
+          <input type="file" accept="image/*" capture="environment" multiple onchange="preview(this,'vLic')">
+        </div>
+      </div>
+
+      <button class="btn-save btn-green" onclick="saveV()">
+        <i class="fas fa-check-circle"></i> บันทึกข้อมูลรถ
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGE: PERSON FORM -->
+  <div id="page-c-form" class="page" style="display:none;">
+    <div class="card">
+      <div class="card-title" style="color:var(--orange);">
+        <i class="fas fa-id-badge"></i> บันทึกตรวจบุคคล
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ประเภท</label>
+        <select id="c-type">
+          <option value="เข้า">🟢 บุคคลเข้า (IN)</option>
+          <option value="ออก">🔴 บุคคลออก (OUT)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ชื่อ-นามสกุล ผู้ติดต่อ</label>
+        <input type="text" id="c-name" placeholder="ชื่อผู้ที่เข้ามาติดต่อ">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">สังกัด / บริษัท</label>
+        <input type="text" id="c-company" placeholder="ชื่อบริษัทหรือสังกัด">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ติดต่อเรื่อง / หมายเหตุ</label>
+        <textarea id="c-note" rows="2" placeholder="ระบุวัตถุประสงค์..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📸 ถ่ายรูปผู้ติดต่อหรือบัตรประชาชน</label>
+        <div id="prev-c-img" class="preview-strip"></div>
+        <div class="cam-zone" style="border-color:var(--orange);">
+          <i class="fas fa-user-tag" style="color:var(--orange)"></i>
+          <span>แตะเพื่อถ่ายภาพ</span>
+          <input type="file" accept="image/*" capture="environment" multiple onchange="preview(this,'cImg')">
+        </div>
+      </div>
+
+      <button class="btn-save btn-orange" onclick="saveC()">
+        <i class="fas fa-check-circle"></i> บันทึกข้อมูลบุคคล
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGE: HISTORY LOG -->
+  <div id="page-note" class="page" style="display:none;">
+    <input class="search-bar" type="text" id="note-search" placeholder="🔍 ค้นหา... ชื่อ, วันที่, ทะเบียน" oninput="filterNotes()">
+    <div class="chips">
+      <div class="chip active" id="filter-all" onclick="setFilter('all',this)">ทั้งหมด</div>
+      <div class="chip" id="filter-att"  onclick="setFilter('attendance',this)">เข้า-ออกงาน</div>
+      <div class="chip" id="filter-pt"   onclick="setFilter('point',this)">ตรวจจุด</div>
+      <div class="chip" id="filter-veh"  onclick="setFilter('vehicle',this)">ตรวจรถ</div>
+      <div class="chip" id="filter-per"  onclick="setFilter('person',this)">ตรวจบุคคล</div>
+    </div>
+    <div id="note-list"></div>
+  </div>
+
+  <!-- PAGE: REPORT -->
+  <div id="page-report" class="page" style="display:none;">
+    <div class="report-header">
+      <h3><i class="fas fa-chart-bar" style="color:var(--purple);margin-right:8px;"></i>รายงานสรุป รปภ.</h3>
+      <p>เลือกเดือนและปีที่ต้องการออกรายงาน</p>
+    </div>
+
+    <div class="card">
+      <div class="report-selects">
+        <select id="gen-month">
+          <option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option>
+          <option value="03">มีนาคม</option><option value="04">เมษายน</option>
+          <option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option>
+          <option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option>
+          <option value="09">กันยายน</option><option value="10">ตุลาคม</option>
+          <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+        </select>
+        <select id="gen-year">
+          <option value="2026">ปี 2026</option>
+          <option value="2025">ปี 2025</option>
+          <option value="2024">ปี 2024</option>
+        </select>
+      </div>
+      <div class="report-btns">
+        <button class="report-btn purple" onclick="generateReport()">
+          <i class="fas fa-plus-circle"></i> สร้าง PDF
+        </button>
+        <button class="report-btn excel" onclick="downloadDirectExcel()">
+          <i class="fas fa-file-excel"></i> โหลด EXCEL
+        </button>
+      </div>
+    </div>
+
+    <div class="report-section-title">ไฟล์รายงานที่สร้างไว้แล้ว</div>
+    <div id="report-list">
+      <div class="loading-center"><div class="loader"></div><p>กำลังโหลด...</p></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- BOTTOM NAV -->
+<nav class="nav-bar" id="bottom-nav">
+  <div class="nav-inner">
+    <div class="nav-item" id="nav-dept" onclick="goHome()">
+      <i class="fas fa-sync-alt"></i>
+      <span>เปลี่ยนแผนก</span>
+    </div>
+    <div class="nav-item active" id="nav-menu" onclick="showP('main-menu')">
+      <i class="fas fa-th-large"></i>
+      <span>เมนูงาน</span>
+    </div>
+    <div class="nav-item" id="nav-note" onclick="showP('note')">
+      <i class="fas fa-list-alt"></i>
+      <span>ประวัติ</span>
+    </div>
+    <div class="nav-item" id="nav-report" onclick="promptPassword()">
+      <i class="fas fa-lock"></i>
+      <span>รายงาน</span>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // ═══════════════════════════════════════════════════
+  // GAS API ADAPTER — แทน google.script.run ทั้งหมด
+  // ไม่ต้องแก้อะไรอีก ทุก call วิ่งผ่าน fetch() ไปที่ GAS
+  // ═══════════════════════════════════════════════════
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwMfNFhBX64vIdeVoqBhQzk0HN8SUcc1-vYIv4b-Irj0CULkFkPCBea1uNSZ09aRIBW/exec';
+
+  const google = {
+    script: {
+      run: {
+        withSuccessHandler(successFn) {
+          // คืน Proxy ที่รับชื่อ method แล้ว fetch ไปยัง GAS
+          return new Proxy({}, {
+            get(_, method) {
+              return async (params) => {
+                try {
+                  // GET requests (ไม่มี body)
+                  if (method === 'getLogs') {
+                    const dept = (typeof params === 'string') ? params : (params?.dept || '');
+                    const res  = await fetch(`${GAS_URL}?action=getLogs&dept=${encodeURIComponent(dept)}`);
+                    const json = await res.json();
+                    successFn(json.data ?? json);
+                    return;
+                  }
+                  if (method === 'getReportList') {
+                    const res  = await fetch(`${GAS_URL}?action=getReportList`);
+                    const json = await res.json();
+                    successFn(json.data ?? json);
+                    return;
+                  }
+                  // Excel — GAS คืน HTML string ตรงๆ ไม่ใช่ JSON
+                  if (method === 'getExcelReport') {
+                    const res  = await fetch(`${GAS_URL}?action=getExcelReport`, {
+                      method: 'POST',
+                      body: JSON.stringify(params ?? {})
+                    });
+                    const text = await res.text();
+                    try { successFn(JSON.parse(text).data ?? JSON.parse(text)); }
+                    catch { successFn(text); }
+                    return;
+                  }
+                  // POST requests (มี body)
+                  const res  = await fetch(`${GAS_URL}?action=${method}`, {
+                    method: 'POST',
+                    body: JSON.stringify(params ?? {})
+                  });
+                  const json = await res.json();
+                  successFn(json.data ?? json);
+                } catch (err) {
+                  console.error(`GAS call failed [${method}]:`, err);
+                  successFn('Error: เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่');
+                }
+              };
+            }
+          });
+        }
+      }
+    }
+  };
+  // ═══════════════════════════════════════════════════
+
+  let currentDept = "";
+  let userGPS = "ไม่สามารถระบุตำแหน่งได้";
+  let isInsideArea = "นอกพื้นที่บริษัท";
+  let allNotes = [];
+  let currentFilter = 'all';
+
+  const CORP_LAT = 12.974423;
+  const CORP_LNG = 101.114835;
+  const RADIUS_M = 100;
+  let imgs = { sStaff: [], pImg: [], vCar: [], vLic: [], cImg: [] };
+
+  // Back button trap
+  window.addEventListener('popstate', function() {
+    if (currentDept !== "") { showP('main-menu'); } else { goHome(); }
+    history.pushState(null, null, window.location.href);
+  });
+  history.pushState(null, null, window.location.href);
+
+  // ─── PASSWORD PROMPT ───
+  function promptPassword() {
+    Swal.fire({
+      title: '🔒 เฉพาะผู้ดูแลระบบ',
+      text: 'กรุณาใส่รหัสผ่าน',
+      input: 'password',
+      inputPlaceholder: 'รหัสผ่าน',
+      showCancelButton: true,
+      confirmButtonText: 'เข้าสู่ระบบ',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#9B5DE5'
+    }).then(result => {
+      if (result.isConfirmed) {
+        if (result.value === '8888') { showP('report'); }
+        else { Swal.fire({ icon: 'error', title: 'รหัสผ่านไม่ถูกต้อง', timer: 1500, showConfirmButton: false }); }
+      }
+    });
+  }
+
+  // ─── NAV ───
+  function updateNav(id) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    if (id) document.getElementById(id)?.classList.add('active');
+  }
+
+  function goHome() {
+    currentDept = "";
+    hideAll();
+    document.getElementById('page-dept').style.display = 'block';
+    document.getElementById('bottom-nav').style.display = 'none';
+    document.getElementById('dept-badge').style.display = 'none';
+    document.getElementById('header-sub').textContent = 'เด็กสมบูรณ์ Security';
+    history.pushState(null, null, window.location.href);
+  }
+
+  function hideAll() { document.querySelectorAll('.page').forEach(x => x.style.display = 'none'); }
+
+  function showP(p) {
+    hideAll();
+    document.getElementById('page-' + p).style.display = 'block';
+    window.scrollTo(0, 0);
+    if (p === 'main-menu') updateNav('nav-menu');
+    if (p === 'note')   { updateNav('nav-note');   loadNotes(); }
+    if (p === 'report') { updateNav('nav-report');  loadReports(); }
+    if (['s-form','p-form','v-form','c-form'].includes(p)) updateNav('nav-menu');
+    if (p === 's-form') getLocation();
+    history.pushState(null, null, window.location.href);
+  }
+
+  // ─── SET DEPT ───
+  function setDept(dept) {
+    currentDept = dept;
+    document.getElementById('page-dept').style.display = 'none';
+    document.getElementById('page-main-menu').style.display = 'block';
+    document.getElementById('bottom-nav').style.display = 'flex';
+    const badge = document.getElementById('dept-badge');
+    badge.style.display = 'block';
+    badge.textContent = dept;
+    document.getElementById('header-sub').textContent = 'แผนก: ' + dept;
+    updateNav('nav-menu');
+    const isGuard = (dept === 'รปภ.');
+    ['btn-point','btn-vehicle','btn-person'].forEach(id => {
+      document.getElementById(id).style.display = isGuard ? 'block' : 'none';
+    });
+    document.getElementById('name-input-guard').style.display = isGuard ? 'block' : 'none';
+    document.getElementById('name-input-maid').style.display  = isGuard ? 'none' : 'block';
+    history.pushState(null, null, window.location.href);
+  }
+
+  // ─── GPS ───
+  function getDistance(lat1,lon1,lat2,lon2) {
+    const R=6371e3, p1=lat1*Math.PI/180, p2=lat2*Math.PI/180;
+    const dp=(lat2-lat1)*Math.PI/180, dl=(lon2-lon1)*Math.PI/180;
+    const a=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  }
+
+  function getLocation() {
+    const el = document.getElementById('gps-status');
+    el.innerHTML = `<div class="gps-box gps-loading"><div class="loader"></div> กำลังตรวจสอบพิกัด GPS...</div>`;
+    if (!navigator.geolocation) { el.innerHTML = `<div class="gps-box gps-err"><i class="fas fa-exclamation-triangle"></i> ไม่รองรับ GPS</div>`; return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const dist = getDistance(CORP_LAT, CORP_LNG, pos.coords.latitude, pos.coords.longitude);
+        userGPS = pos.coords.latitude.toFixed(6) + ", " + pos.coords.longitude.toFixed(6);
+        if (dist <= RADIUS_M) {
+          isInsideArea = "ในพื้นที่บริษัท";
+          el.innerHTML = `<div class="gps-box gps-ok"><i class="fas fa-check-circle"></i> อยู่ในพื้นที่บริษัท ✓</div>`;
+        } else {
+          isInsideArea = "นอกพื้นที่บริษัท";
+          el.innerHTML = `<div class="gps-box gps-err"><i class="fas fa-exclamation-triangle"></i> นอกพื้นที่! (ห่าง ${Math.round(dist)} ม.)</div>`;
+        }
+      },
+      () => {
+        el.innerHTML = `<div class="gps-box gps-loading"><i class="fas fa-map-marker-slash"></i> ไม่สามารถระบุตำแหน่ง — โปรดเปิดสิทธิ์ GPS</div>`;
+      },
+      { enableHighAccuracy: true }
+    );
+  }
+
+  // ─── IMAGE PREVIEW (with compression) ───
+  function preview(input, type) {
+    if (!input.files || !input.files.length) return;
+    const gridMap = { sStaff:'prev-s-staff', pImg:'prev-p-img', vCar:'prev-v-car', vLic:'prev-v-lic', cImg:'prev-c-img' };
+    Array.from(input.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX = 800, scale = MAX / img.width;
+          canvas.width = MAX; canvas.height = img.height * scale;
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          const b64 = canvas.toDataURL('image/jpeg', 0.6);
+          document.getElementById(gridMap[type]).innerHTML += `<img src="${b64}" style="cursor:zoom-in;" onclick="zoomImg(this.src)">`;
+          imgs[type].push(b64);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function zoomImg(src) {
+    Swal.fire({ imageUrl: src, showConfirmButton: true, confirmButtonText: 'ปิด', confirmButtonColor: '#333', width: '96%', padding: '8px', background: '#000', allowOutsideClick: true });
+  }
+
+  function zoom(id) {
+    Swal.fire({ imageUrl: 'https://drive.google.com/thumbnail?sz=w1000&id=' + id, showConfirmButton: true, confirmButtonText: 'ปิด', confirmButtonColor: '#333', width: '96%', padding: '8px', background: '#000', allowOutsideClick: true });
+  }
+
+  // ─── SAVE HANDLERS ───
+  function doneSave(msg) {
+    if (msg.toString().includes("Error") || msg.toString().includes("ข้อผิดพลาด")) {
+      Swal.fire({ icon: 'error', title: 'พบปัญหา!', text: msg });
+    } else {
+      Swal.fire({ icon: 'success', title: 'สำเร็จ! ✓', text: msg, timer: 2000, showConfirmButton: false })
+        .then(() => {
+          document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+          document.getElementById('p-name').value = '';
+          document.getElementById('s-name-maid').value = '';
+          document.querySelectorAll('.preview-strip').forEach(el => el.innerHTML = '');
+          imgs = { sStaff: [], pImg: [], vCar: [], vLic: [], cImg: [] };
+          showP('main-menu');
+        });
+    }
+  }
+
+  function saveS() {
+    const n = (currentDept === 'แม่บ้าน') ? document.getElementById('s-name-maid').value : document.getElementById('s-name-guard').value;
+    if (!n) return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'โปรดระบุชื่อของคุณ', confirmButtonColor: '#3B82F6' });
+    if (!imgs.sStaff.length) return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'โปรดถ่ายรูปเซลฟี่ด้วย', confirmButtonColor: '#3B82F6' });
+    if (isInsideArea === "นอกพื้นที่บริษัท") {
+      Swal.fire({ icon: 'warning', title: 'คุณอยู่นอกพื้นที่!', text: 'ต้องการบันทึกเวลาต่อไปหรือไม่?', showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#FF4455' })
+        .then(r => { if (r.isConfirmed) proceedSaveS(n); });
+    } else { proceedSaveS(n); }
+  }
+
+  function proceedSaveS(n) {
+    Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+    google.script.run.withSuccessHandler(doneSave)
+      .saveAttendance({ dept: currentDept, type: document.getElementById('s-type').value, name: n, gps: userGPS, status: isInsideArea, imgStaffList: imgs.sStaff });
+  }
+
+  function saveP() {
+    const pn   = document.getElementById('p-name').value;
+    const insp = document.getElementById('p-inspector-guard').value;
+    if (!pn)   return Swal.fire({ icon: 'warning', title: 'เลือกจุดตรวจก่อน', confirmButtonColor: '#FF4455' });
+    if (!insp) return Swal.fire({ icon: 'warning', title: 'ระบุชื่อผู้ตรวจด้วย', confirmButtonColor: '#FF4455' });
+    if (!imgs.pImg.length) return Swal.fire({ icon: 'warning', title: 'ถ่ายรูปจุดตรวจด้วย', confirmButtonColor: '#FF4455' });
+    Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+    google.script.run.withSuccessHandler(doneSave)
+      .savePoint({ dept: currentDept, pointName: pn, status: document.getElementById('p-status').value, note: document.getElementById('p-note').value, inspector: insp, imgList: imgs.pImg });
+  }
+
+  function saveV() {
+    const p = document.getElementById('v-plate').value;
+    if (!p || !imgs.vCar.length) return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'โปรดระบุทะเบียนและถ่ายรูปรถ', confirmButtonColor: '#00C471' });
+    Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+    google.script.run.withSuccessHandler(doneSave)
+      .saveVehicle({ dept: currentDept, type: document.getElementById('v-type').value, plate: p, driver: document.getElementById('v-driver').value, note: document.getElementById('v-note').value, imgCarList: imgs.vCar, imgLicenseList: imgs.vLic });
+  }
+
+  function saveC() {
+    const n = document.getElementById('c-name').value;
+    if (!n || !imgs.cImg.length) return Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'โปรดระบุชื่อและถ่ายรูป', confirmButtonColor: '#FF8C42' });
+    Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+    google.script.run.withSuccessHandler(doneSave)
+      .savePerson({ dept: currentDept, type: document.getElementById('c-type').value, name: n, company: document.getElementById('c-company').value, note: document.getElementById('c-note').value, imgList: imgs.cImg });
+  }
+
+  // ─── NOTES ───
+  function setFilter(type, el) {
+    currentFilter = type;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    filterNotes();
+  }
+
+  function filterNotes() {
+    const kw = document.getElementById('note-search').value.toLowerCase();
+    const filtered = allNotes.filter(x => {
+      const matchType = currentFilter === 'all' || x.type === currentFilter;
+      const matchKw   = x.title.toLowerCase().includes(kw) || x.desc.toLowerCase().includes(kw) || x.time.includes(kw);
+      return matchType && matchKw;
+    });
+    if (!filtered.length) {
+      document.getElementById('note-list').innerHTML = `<div class="empty-state"><i class="fas fa-search"></i><p>ไม่พบข้อมูลที่ค้นหา</p></div>`;
+      return;
+    }
+    const colorMap = { attendance: { in: 'var(--green)', out: 'var(--red)', default: 'var(--blue)' }, point: 'var(--red)', vehicle: { in: 'var(--green)', out: 'var(--red)' }, person: 'var(--orange)' };
+    let h = '';
+    filtered.forEach(x => {
+      let titleColor = 'var(--text)';
+      if (x.type === 'attendance') titleColor = x.title.includes('[เข้างาน]') ? 'var(--green)' : 'var(--red)';
+      else if (x.type === 'point')  titleColor = 'var(--red)';
+      else if (x.type === 'vehicle') titleColor = x.title.includes('[รถเข้า]') ? 'var(--green)' : 'var(--red)';
+      else if (x.type === 'person') titleColor = 'var(--orange)';
+
+      const photos = x.imgIds?.length
+        ? `<div class="log-photos">${x.imgIds.map(id => `<img src="https://drive.google.com/thumbnail?sz=s400&id=${id}" onclick="zoom('${id}')" loading="lazy">`).join('')}</div>` : '';
+
+      h += `<div class="log-item">
+              <div class="log-time"><i class="far fa-clock"></i> ${x.time}</div>
+              ${photos}
+              <div class="log-body">
+                <div class="log-title" style="color:${titleColor};">${x.title}</div>
+                <div class="log-desc">${x.desc || '—'}</div>
+              </div>
+            </div>`;
+    });
+    document.getElementById('note-list').innerHTML = h;
+  }
+
+  function loadNotes() {
+    document.getElementById('note-search').value = '';
+    document.getElementById('note-list').innerHTML = `<div class="loading-center"><div class="loader"></div><p>กำลังดึงข้อมูล...</p></div>`;
+    google.script.run.withSuccessHandler(data => {
+      allNotes = (currentDept === 'แม่บ้าน') ? data.filter(x => x.type === 'attendance') : data;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      document.getElementById('filter-all').classList.add('active');
+      currentFilter = 'all';
+      filterNotes();
+    }).getLogs(currentDept);
+  }
+
+  // ─── REPORTS ───
+  function generateReport() {
+    const m = document.getElementById('gen-month').value;
+    const y = document.getElementById('gen-year').value;
+    Swal.fire({ title: '⏳ กำลังสร้าง PDF...', text: 'อาจใช้เวลา 10-15 วินาที', didOpen: () => Swal.showLoading() });
+    google.script.run.withSuccessHandler(msg => {
+      if (msg.includes("ถูกสร้างไปแล้ว")) Swal.fire({ icon: 'info', title: 'แจ้งเตือน', text: msg });
+      else if (msg.includes("Error")) Swal.fire({ icon: 'error', title: 'พบปัญหา!', text: msg });
+      else Swal.fire({ icon: 'success', title: 'สร้างรายงานสำเร็จ ✓', text: msg, timer: 2000, showConfirmButton: false }).then(() => loadReports());
+    }).generateMonthlyReport({ m, y });
+  }
+
+  function downloadDirectExcel() {
+    const m = document.getElementById('gen-month').value;
+    const y = document.getElementById('gen-year').value;
+    Swal.fire({ title: 'กำลังดึงข้อมูล...', didOpen: () => Swal.showLoading() });
+    google.script.run.withSuccessHandler(htmlData => {
+      const blob = new Blob([htmlData], { type: 'application/vnd.ms-excel' });
+      const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `รายงานรปภ_${m}_${y}.xls` });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      Swal.close();
+    }).getExcelReport({ m, y });
+  }
+
+  function downloadExcelFromList(m, y) {
+    Swal.fire({ title: 'กำลังดึงข้อมูล...', didOpen: () => Swal.showLoading() });
+    google.script.run.withSuccessHandler(htmlData => {
+      const blob = new Blob([htmlData], { type: 'application/vnd.ms-excel' });
+      const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `รายงานรปภ_${m}_${y}.xls` });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      Swal.close();
+    }).getExcelReport({ m, y });
+  }
+
+  function loadReports() {
+    document.getElementById('report-list').innerHTML = `<div class="loading-center"><div class="loader"></div><p>กำลังโหลด...</p></div>`;
+    google.script.run.withSuccessHandler(data => {
+      if (!data?.length) {
+        document.getElementById('report-list').innerHTML = `<div class="empty-state"><i class="fas fa-folder-open"></i><p>ยังไม่มีรายงานที่สร้างไว้</p></div>`;
+        return;
+      }
+      const monthMap = {"มกราคม":"01","กุมภาพันธ์":"02","มีนาคม":"03","เมษายน":"04","พฤษภาคม":"05","มิถุนายน":"06","กรกฎาคม":"07","สิงหาคม":"08","กันยายน":"09","ตุลาคม":"10","พฤศจิกายน":"11","ธันวาคม":"12"};
+      let h = '';
+      data.forEach(r => {
+        const monthYear = (r[1]||'').replace(/'/g,'');
+        const pdfLink   = r[2] || '#';
+        let mCode = '', yCode = '';
+        const parts = monthYear.trim().split(' ');
+        if (parts.length >= 2) { mCode = monthMap[parts[0]]; yCode = parts[1]; }
+        const excelBtn = (mCode && yCode)
+          ? `<button class="report-file-btn excel" onclick="downloadExcelFromList('${mCode}','${yCode}')"><i class="fas fa-file-excel"></i> EXCEL</button>` : '';
+        h += `<div class="report-file-card">
+                <div class="report-file-title"><i class="fas fa-folder" style="color:var(--purple);margin-right:6px;"></i>เดือน: ${monthYear}</div>
+                <div class="report-file-date">สร้างเมื่อ: ${r[0]||'-'}</div>
+                <div class="report-file-btns">
+                  <a class="report-file-btn pdf" href="${pdfLink}" target="_blank"><i class="fas fa-file-pdf"></i> PDF</a>
+                  ${excelBtn}
+                </div>
+              </div>`;
+      });
+      document.getElementById('report-list').innerHTML = h;
+    }).getReportList();
+  }
+</script>
+
+</body>
+</html>
